@@ -1,0 +1,11 @@
+package com.example.demo;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+
+public interface CarOrderRepository extends JpaRepository<CarOrder, Long> {
+
+    List<CarOrder> findByCustomerIdOrderByOrderDateDesc(Long customerId);
+
+    List<CarOrder> findAllByOrderByOrderDateDesc();
+}

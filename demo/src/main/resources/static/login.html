@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CARSTUDIO | Login</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100%;
+            height: 100vh;
+            background: #000;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        /* =========================
+           LOGIN SCREEN
+        ========================= */
+
+        #loginScreen {
+            width: 100%;
+            height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            background:
+                radial-gradient(
+                    circle at center,
+                    #07111e,
+                    #020406 55%,
+                    #000
+                );
+        }
+
+        .loginBox {
+            width: 380px;
+            padding: 45px;
+
+            background: rgba(5,10,17,.94);
+
+            border:
+                1px solid
+                rgba(22,140,255,.4);
+
+            box-shadow:
+                0 0 50px
+                rgba(22,140,255,.15);
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 26px;
+            font-weight: bold;
+            letter-spacing: 5px;
+            margin-bottom: 40px;
+        }
+
+        .logo span {
+            color: #168cff;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 11px;
+            letter-spacing: 2px;
+            margin-bottom: 35px;
+        }
+
+        label {
+            display: block;
+            color: #94a3b8;
+            font-size: 11px;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 20px;
+
+            background: #02060b;
+
+            border:
+                1px solid
+                #26384a;
+
+            color: white;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #168cff;
+
+            box-shadow:
+                0 0 15px
+                rgba(22,140,255,.2);
+        }
+
+        #loginButton {
+            width: 100%;
+            padding: 15px;
+
+            border: none;
+
+            background: #087df0;
+
+            color: white;
+
+            cursor: pointer;
+
+            letter-spacing: 2px;
+            font-size: 13px;
+        }
+
+        #loginButton:hover {
+            background: #168cff;
+
+            box-shadow:
+                0 0 25px
+                rgba(22,140,255,.5);
+        }
+
+        #error {
+            color: #ff5c5c;
+            text-align: center;
+            font-size: 12px;
+            margin-top: 15px;
+        }
+
+        /* =========================
+           HEADLIGHT INTRO
+        ========================= */
+
+        #carIntro {
+            position: fixed;
+            inset: 0;
+
+            background: #000;
+
+            display: none;
+
+            z-index: 9999;
+        }
+
+        #headlightImage {
+            position: absolute;
+            inset: 0;
+
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+        }
+
+        .dark {
+            position: absolute;
+            inset: 0;
+
+            background:
+                rgba(0,0,0,.25);
+        }
+
+        .introControls {
+            position: absolute;
+
+            bottom: 8%;
+
+            left: 50%;
+
+            transform:
+                translateX(-50%);
+
+            text-align: center;
+        }
+
+        .welcome {
+            color: #bcdcff;
+
+            font-size: 13px;
+
+            letter-spacing: 4px;
+
+            margin-bottom: 20px;
+
+            text-shadow:
+                0 0 15px
+                #168cff;
+        }
+
+        #continueButton {
+            padding:
+                15px 30px;
+
+            background:
+                rgba(0,0,0,.7);
+
+            border:
+                1px solid
+                #168cff;
+
+            color: white;
+
+            cursor: pointer;
+
+            letter-spacing: 2px;
+
+            font-size: 12px;
+        }
+
+        #continueButton:hover {
+            background: #168cff;
+
+            box-shadow:
+                0 0 30px
+                rgba(22,140,255,.6);
+        }
+
+        @media(max-width:600px) {
+
+            .loginBox {
+                width: 90%;
+                padding: 30px;
+            }
+
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+
+<!-- =========================
+     LOGIN
+========================= -->
+
+<div id="loginScreen">
+
+    <div class="loginBox">
+
+        <div class="logo">
+            CAR<span>STUDIO</span>
+        </div>
+
+        <h1>
+            SECURE LOGIN
+        </h1>
+
+        <div class="subtitle">
+            ACCESS CARSTUDIO
+        </div>
+
+
+        <label>
+            USERNAME
+        </label>
+
+        <input
+            type="text"
+            id="username"
+            autocomplete="off"
+        >
+
+
+        <label>
+            PASSWORD
+        </label>
+
+        <input
+            type="password"
+            id="password"
+        >
+
+
+        <button
+            type="button"
+            id="loginButton"
+        >
+            LOGIN
+        </button>
+
+
+        <div id="error"></div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================
+     HEADLIGHT INTRO
+========================= -->
+
+<div id="carIntro">
+
+    <img
+        src="images/headlights.jpg"
+        id="headlightImage"
+        alt="CARSTUDIO"
+    >
+
+    <div class="dark"></div>
+
+
+    <div class="introControls">
+
+        <div class="welcome">
+            WELCOME TO CARSTUDIO
+        </div>
+
+        <button
+            type="button"
+            id="continueButton"
+        >
+            ENTER CARSTUDIO →
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+/* =========================
+   ELEMENTS
+========================= */
+
+const loginScreen =
+    document.getElementById("loginScreen");
+
+const carIntro =
+    document.getElementById("carIntro");
+
+const loginButton =
+    document.getElementById("loginButton");
+
+const continueButton =
+    document.getElementById("continueButton");
+
+const error =
+    document.getElementById("error");
+
+
+/* =========================
+   LOGIN
+========================= */
+
+loginButton.addEventListener(
+    "click",
+    function () {
+
+        const username =
+            document.getElementById(
+                "username"
+            ).value.trim();
+
+        const password =
+            document.getElementById(
+                "password"
+            ).value;
+
+
+        /* TEMPORARY LOGIN */
+
+        if (
+            username === "admin" &&
+            password === "admin123"
+        ) {
+
+            error.textContent = "";
+
+
+            /*
+             SAVE LOGIN
+            */
+
+            localStorage.setItem(
+                "carstudioLoggedIn",
+                "true"
+            );
+
+
+            localStorage.setItem(
+                "carstudioUsername",
+                username
+            );
+
+
+            /*
+             HIDE LOGIN
+            */
+
+            loginScreen.style.display =
+                "none";
+
+
+            /*
+             SHOW HEADLIGHTS
+             AFTER 2 SECONDS
+            */
+
+            setTimeout(
+                function () {
+
+                    carIntro.style.display =
+                        "block";
+
+                },
+                2000
+            );
+
+        }
+
+        else {
+
+            error.textContent =
+                "Invalid username or password.";
+
+        }
+
+    }
+);
+
+
+/* =========================
+   ENTER CARSTUDIO
+========================= */
+
+continueButton.addEventListener(
+    "click",
+    function () {
+
+        window.location.replace(
+            "index.html"
+        );
+
+    }
+);
+
+
+/* =========================
+   ENTER KEY
+========================= */
+
+document.addEventListener(
+    "keydown",
+    function (event) {
+
+        if (
+            carIntro.style.display === "block" &&
+            event.key === "Enter"
+        ) {
+
+            event.preventDefault();
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>

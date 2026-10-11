@@ -1,0 +1,2980 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CARSTUDIO — Urus SE Configurator</title>
+
+<style>
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #0b0e11;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 68px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 28px;
+
+    background: rgba(9, 11, 13, 0.94);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+
+    backdrop-filter: blur(15px);
+
+    z-index: 100;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 5px;
+}
+
+.car-name {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: #c5c8ca;
+}
+
+.collection {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #aaa;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.collection:hover {
+    color: white;
+}
+
+
+/* =========================================================
+   3D VIEWER
+========================================================= */
+
+.viewer {
+    position: absolute;
+
+    top: 68px;
+    left: 0;
+    right: 360px;
+    bottom: 0;
+
+    overflow: hidden;
+
+    background:
+        radial-gradient(
+            ellipse at 50% 58%,
+            rgba(115,128,140,0.55) 0%,
+            rgba(65,76,86,0.40) 28%,
+            rgba(25,30,35,0.85) 58%,
+            rgba(8,11,14,1) 100%
+        ),
+        linear-gradient(
+            180deg,
+            #080b0e 0%,
+            #11161a 45%,
+            #242c32 72%,
+            #3c464d 100%
+        );
+}
+
+#canvas-container {
+    position: absolute;
+    inset: 0;
+}
+
+canvas {
+    display: block;
+}
+
+
+/* =========================================================
+   VEHICLE TITLE
+========================================================= */
+
+.viewer-title {
+    position: absolute;
+    top: 35px;
+    left: 38px;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.viewer-title small {
+    display: block;
+    margin-bottom: 8px;
+
+    color: #aeb4b8;
+
+    font-size: 9px;
+    letter-spacing: 5px;
+}
+
+.viewer-title h1 {
+    font-size: clamp(34px, 4vw, 56px);
+    font-weight: 300;
+    letter-spacing: 3px;
+}
+
+
+/* =========================================================
+   ROTATION HINT
+========================================================= */
+
+.rotation-hint {
+    position: absolute;
+
+    left: 38px;
+    bottom: 25px;
+
+    z-index: 10;
+
+    color: rgba(255,255,255,0.65);
+
+    font-size: 9px;
+    letter-spacing: 2px;
+
+    pointer-events: none;
+}
+
+
+/* =========================================================
+   LOADER
+========================================================= */
+
+.loader {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            #252d33 0%,
+            #111519 55%,
+            #090c0f 100%
+        );
+
+    z-index: 30;
+
+    transition: opacity 0.6s ease;
+}
+
+.loader.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loader-content {
+    text-align: center;
+}
+
+.loader-ring {
+    width: 44px;
+    height: 44px;
+
+    margin: 0 auto 18px;
+
+    border: 1px solid rgba(255,255,255,0.15);
+    border-top-color: white;
+
+    border-radius: 50%;
+
+    animation: spin 1s linear infinite;
+}
+
+.loader-text {
+    font-size: 9px;
+    letter-spacing: 4px;
+    color: #aaa;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* =========================================================
+   RIGHT CONFIGURATOR
+========================================================= */
+
+.configurator {
+    position: fixed;
+
+    top: 68px;
+    right: 0;
+    bottom: 0;
+
+    width: 360px;
+
+    display: flex;
+    flex-direction: column;
+
+    background:
+        linear-gradient(
+            180deg,
+            #151719 0%,
+            #090b0c 100%
+        );
+
+    border-left: 1px solid rgba(255,255,255,0.10);
+
+    z-index: 50;
+}
+
+
+/* =========================================================
+   TABS
+========================================================= */
+
+.tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    flex-shrink: 0;
+
+    border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+
+.tab {
+    position: relative;
+
+    padding: 20px 4px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #666;
+
+    font-size: 9px;
+    letter-spacing: 1.8px;
+
+    cursor: pointer;
+
+    transition: 0.25s;
+}
+
+.tab:hover {
+    color: white;
+}
+
+.tab.active {
+    color: white;
+}
+
+.tab.active::after {
+    content: "";
+
+    position: absolute;
+
+    left: 20%;
+    right: 20%;
+    bottom: 0;
+
+    height: 2px;
+
+    background: white;
+}
+
+
+/* =========================================================
+   CONFIG PANEL
+========================================================= */
+
+.panel {
+    flex: 1;
+
+    overflow-y: auto;
+
+    padding: 27px 24px 165px;
+}
+
+.panel::-webkit-scrollbar {
+    width: 4px;
+}
+
+.panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.panel::-webkit-scrollbar-thumb {
+    background: #3a3d40;
+    border-radius: 20px;
+}
+
+
+/* =========================================================
+   SECTION
+========================================================= */
+
+.section {
+    margin-bottom: 34px;
+}
+
+.section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 16px;
+}
+
+.section-title h2 {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 2.5px;
+}
+
+.section-title span {
+    color: #666;
+    font-size: 8px;
+    letter-spacing: 1px;
+}
+
+
+/* =========================================================
+   PAINT
+========================================================= */
+
+.paint-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+}
+
+.paint-option {
+    width: 38px;
+    height: 38px;
+
+    border-radius: 50%;
+
+    border: 1px solid rgba(255,255,255,0.18);
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.paint-option:hover {
+    transform: scale(1.08);
+    border-color: white;
+}
+
+.paint-option.active {
+    border-color: white;
+
+    box-shadow:
+        0 0 0 2px #111,
+        0 0 0 3px white;
+}
+
+.paint-black {
+    background:
+        linear-gradient(
+            145deg,
+            #020202,
+            #555
+        );
+}
+
+.paint-white {
+    background:
+        linear-gradient(
+            145deg,
+            #fff,
+            #aaa
+        );
+}
+
+.paint-red {
+    background:
+        linear-gradient(
+            145deg,
+            #700006,
+            #ef1b25
+        );
+}
+
+.paint-blue {
+    background:
+        linear-gradient(
+            145deg,
+            #07172f,
+            #2b6dcc
+        );
+}
+
+.paint-green {
+    background:
+        linear-gradient(
+            145deg,
+            #032718,
+            #14945c
+        );
+}
+
+.paint-orange {
+    background:
+        linear-gradient(
+            145deg,
+            #702300,
+            #ff761b
+        );
+}
+
+
+/* =========================================================
+   FINISH
+========================================================= */
+
+.finish-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.finish-option {
+    height: 60px;
+
+    border: 1px solid rgba(255,255,255,0.10);
+
+    background: rgba(255,255,255,0.025);
+
+    color: #888;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.finish-option:hover {
+    color: white;
+    border-color: rgba(255,255,255,0.4);
+}
+
+.finish-option.active {
+    color: white;
+
+    border-color: white;
+
+    background: rgba(255,255,255,0.07);
+}
+
+.finish-name {
+    display: block;
+
+    padding-top: 16px;
+
+    font-size: 9px;
+    letter-spacing: 1.5px;
+}
+
+.finish-description {
+    display: block;
+
+    margin-top: 5px;
+
+    color: #666;
+
+    font-size: 7px;
+    letter-spacing: 1px;
+}
+
+
+/* =========================================================
+   WHEELS
+========================================================= */
+
+.wheel-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 9px;
+}
+
+.wheel-option {
+    min-height: 60px;
+
+    padding: 10px;
+
+    border: 1px solid rgba(255,255,255,0.10);
+
+    background: rgba(255,255,255,0.025);
+
+    color: #888;
+
+    cursor: pointer;
+
+    font-size: 8px;
+    letter-spacing: 1.2px;
+
+    transition: 0.2s;
+}
+
+.wheel-option:hover {
+    color: white;
+    border-color: rgba(255,255,255,0.4);
+}
+
+.wheel-option.active {
+    color: white;
+
+    border-color: white;
+
+    background: rgba(255,255,255,0.07);
+}
+
+
+/* =========================================================
+   BRAKES
+========================================================= */
+
+.brake-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.brake-option {
+    padding: 14px 5px;
+
+    border: 1px solid rgba(255,255,255,0.10);
+
+    background: rgba(255,255,255,0.025);
+
+    color: #888;
+
+    font-size: 8px;
+    letter-spacing: 1px;
+
+    cursor: pointer;
+}
+
+.brake-option:hover {
+    color: white;
+    border-color: rgba(255,255,255,0.4);
+}
+
+.brake-option.active {
+    color: white;
+    border-color: white;
+}
+
+
+/* =========================================================
+   COMING SOON
+========================================================= */
+
+.coming-soon {
+    padding: 30px 5px;
+
+    color: #666;
+
+    font-size: 9px;
+
+    letter-spacing: 1.5px;
+
+    line-height: 2.2;
+}
+
+
+/* =========================================================
+   PRICE
+========================================================= */
+
+.bottom-bar {
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    padding: 20px 24px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(9,11,12,0),
+            rgba(9,11,12,0.96) 28%
+        );
+
+    border-top: 1px solid rgba(255,255,255,0.08);
+
+    z-index: 20;
+}
+
+.price-label {
+    margin-bottom: 5px;
+
+    color: #666;
+
+    font-size: 8px;
+    letter-spacing: 2px;
+}
+
+.price {
+    margin-bottom: 14px;
+
+    font-size: 22px;
+    letter-spacing: 1px;
+}
+
+.order-button {
+    width: 100%;
+
+    padding: 15px;
+
+    border: 1px solid white;
+
+    background: white;
+
+    color: #090909;
+
+    font-size: 9px;
+    letter-spacing: 2px;
+
+    cursor: pointer;
+
+    transition: 0.25s;
+}
+
+.order-button:hover {
+    background: transparent;
+    color: white;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    html,
+    body {
+        overflow: auto;
+    }
+
+    .topbar {
+        height: 60px;
+        padding: 0 18px;
+    }
+
+    .logo {
+        font-size: 17px;
+        letter-spacing: 3px;
+    }
+
+    .car-name {
+        position: static;
+        transform: none;
+
+        margin-left: auto;
+        margin-right: 15px;
+    }
+
+    .collection {
+        display: none;
+    }
+
+    .viewer {
+        position: relative;
+
+        top: 60px;
+
+        right: 0;
+
+        width: 100%;
+
+        height: 55vh;
+
+        min-height: 400px;
+    }
+
+    .configurator {
+        position: relative;
+
+        top: 60px;
+
+        width: 100%;
+
+        min-height: 700px;
+
+        border-left: none;
+
+        border-top: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .viewer-title {
+        top: 22px;
+        left: 20px;
+    }
+
+    .rotation-hint {
+        left: 20px;
+        bottom: 18px;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =======================================================
+     TOP BAR
+======================================================== -->
+
+<header class="topbar">
+
+    <div class="logo">
+        CARSTUDIO
+    </div>
+
+    <div class="car-name">
+        URUS SE
+    </div>
+
+    <div
+        class="collection"
+        id="collectionButton"
+    >
+        ← COLLECTION
+    </div>
+
+</header>
+
+
+
+<!-- =======================================================
+     3D VIEWER
+======================================================== -->
+
+<main class="viewer">
+
+    <div class="viewer-title">
+
+        <small>
+            LAMBORGHINI
+        </small>
+
+        <h1>
+            URUS SE
+        </h1>
+
+    </div>
+
+
+    <div id="canvas-container"></div>
+
+
+    <div class="rotation-hint">
+
+        ↔ DRAG TO ROTATE
+        &nbsp;&nbsp; • &nbsp;&nbsp;
+        SCROLL TO ZOOM
+
+    </div>
+
+
+    <div
+        class="loader"
+        id="loader"
+    >
+
+        <div class="loader-content">
+
+            <div class="loader-ring"></div>
+
+            <div class="loader-text">
+                LOADING VEHICLE
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+
+
+<!-- =======================================================
+     CONFIGURATOR
+======================================================== -->
+
+<aside class="configurator">
+
+
+    <div class="tabs">
+
+        <button
+            class="tab active"
+            data-tab="exterior"
+        >
+            EXTERIOR
+        </button>
+
+
+        <button
+            class="tab"
+            data-tab="interior"
+        >
+            INTERIOR
+        </button>
+
+
+        <button
+            class="tab"
+            data-tab="equipment"
+        >
+            EQUIPMENT
+        </button>
+
+    </div>
+
+
+
+    <div class="panel">
+
+
+        <!-- =================================================
+             EXTERIOR
+        ================================================== -->
+
+        <div id="exterior-panel">
+
+
+            <!-- PAINT -->
+
+            <section class="section">
+
+                <div class="section-title">
+
+                    <h2>
+                        PAINT
+                    </h2>
+
+                    <span id="paint-name">
+                        NERO
+                    </span>
+
+                </div>
+
+
+                <div class="paint-grid">
+
+                    <button
+                        class="paint-option paint-black active"
+                        data-color="#151515"
+                        data-name="NERO"
+                    ></button>
+
+
+                    <button
+                        class="paint-option paint-white"
+                        data-color="#eeeeee"
+                        data-name="BIANCO"
+                    ></button>
+
+
+                    <button
+                        class="paint-option paint-red"
+                        data-color="#c91520"
+                        data-name="ROSSO"
+                    ></button>
+
+
+                    <button
+                        class="paint-option paint-blue"
+                        data-color="#174a9c"
+                        data-name="BLU"
+                    ></button>
+
+
+                    <button
+                        class="paint-option paint-green"
+                        data-color="#087a4a"
+                        data-name="VERDE"
+                    ></button>
+
+
+                    <button
+                        class="paint-option paint-orange"
+                        data-color="#e85d10"
+                        data-name="ARANCIO"
+                    ></button>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- FINISH -->
+
+            <section class="section">
+
+                <div class="section-title">
+
+                    <h2>
+                        FINISH
+                    </h2>
+
+                    <span>
+                        BODY
+                    </span>
+
+                </div>
+
+
+                <div class="finish-grid">
+
+                    <button
+                        class="finish-option active"
+                        data-finish="Gloss"
+                        data-price="0"
+                    >
+
+                        <span class="finish-name">
+                            GLOSS
+                        </span>
+
+                        <span class="finish-description">
+                            HIGH SHINE
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        class="finish-option"
+                        data-finish="Matte"
+                        data-price="250000"
+                    >
+
+                        <span class="finish-name">
+                            MATTE
+                        </span>
+
+                        <span class="finish-description">
+                            LOW REFLECTION
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        class="finish-option"
+                        data-finish="Satin"
+                        data-price="180000"
+                    >
+
+                        <span class="finish-name">
+                            SATIN
+                        </span>
+
+                        <span class="finish-description">
+                            SOFT SHINE
+                        </span>
+
+                    </button>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- WHEELS -->
+
+            <section class="section">
+
+                <div class="section-title">
+
+                    <h2>
+                        WHEELS
+                    </h2>
+
+                    <span>
+                        DESIGN
+                    </span>
+
+                </div>
+
+
+                <div class="wheel-grid">
+
+                    <button
+                        class="wheel-option active"
+                        data-wheel="Standard"
+                        data-price="0"
+                    >
+                        STANDARD
+                    </button>
+
+
+                    <button
+                        class="wheel-option"
+                        data-wheel="Sport"
+                        data-price="350000"
+                    >
+                        SPORT
+                    </button>
+
+
+                    <button
+                        class="wheel-option"
+                        data-wheel="Performance"
+                        data-price="550000"
+                    >
+                        PERFORMANCE
+                    </button>
+
+
+                    <button
+                        class="wheel-option"
+                        data-wheel="Forged"
+                        data-price="800000"
+                    >
+                        FORGED
+                    </button>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- BRAKES -->
+
+            <section class="section">
+
+                <div class="section-title">
+
+                    <h2>
+                        BRAKE CALIPERS
+                    </h2>
+
+                    <span>
+                        COLOR
+                    </span>
+
+                </div>
+
+
+                <div class="brake-grid">
+
+                    <button
+                        class="brake-option active"
+                        data-brake="Red"
+                        data-price="0"
+                    >
+                        RED
+                    </button>
+
+
+                    <button
+                        class="brake-option"
+                        data-brake="Black"
+                        data-price="25000"
+                    >
+                        BLACK
+                    </button>
+
+
+                    <button
+                        class="brake-option"
+                        data-brake="Yellow"
+                        data-price="35000"
+                    >
+                        YELLOW
+                    </button>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- EXTERIOR DETAILS -->
+
+            <section class="section">
+
+                <div class="section-title">
+
+                    <h2>
+                        EXTERIOR DETAILS
+                    </h2>
+
+                    <span>
+                        OPTIONS
+                    </span>
+
+                </div>
+
+
+                <div class="wheel-grid">
+
+                    <button
+                        class="wheel-option"
+                        data-detail="Front Splitter"
+                        data-price="180000"
+                    >
+                        FRONT
+                        <br>
+                        SPLITTER
+                    </button>
+
+
+                    <button
+                        class="wheel-option"
+                        data-detail="Side Details"
+                        data-price="150000"
+                    >
+                        SIDE
+                        <br>
+                        DETAILS
+                    </button>
+
+
+                    <button
+                        class="wheel-option"
+                        data-detail="Rear Details"
+                        data-price="180000"
+                    >
+                        REAR
+                        <br>
+                        DETAILS
+                    </button>
+
+
+                    <button
+                        class="wheel-option"
+                        data-detail="Carbon Package"
+                        data-price="450000"
+                    >
+                        CARBON
+                        <br>
+                        PACKAGE
+                    </button>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+
+        <!-- =================================================
+             INTERIOR
+        ================================================== -->
+
+        <div
+            id="interior-panel"
+            style="display:none;"
+        >
+
+            <div class="coming-soon">
+
+                INTERIOR CUSTOMIZATION
+
+                <br><br>
+
+                SEATS
+                <br>
+
+                DASHBOARD
+                <br>
+
+                STEERING
+                <br>
+
+                TRIM
+                <br>
+
+                STITCHING
+
+                <br><br>
+
+                3D INTERIOR CUSTOMIZATION
+                WILL BE CONNECTED IN
+                THE NEXT PHASE.
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             EQUIPMENT
+        ================================================== -->
+
+        <div
+            id="equipment-panel"
+            style="display:none;"
+        >
+
+            <div class="coming-soon">
+
+                EQUIPMENT & ACCESSORIES
+
+                <br><br>
+
+                ACCESSORIES
+                <br>
+
+                OPTIONAL EQUIPMENT
+                <br>
+
+                ADDITIONAL FEATURES
+
+                <br><br>
+
+                THIS MODULE WILL BE
+                IMPLEMENTED AFTER
+                INTERIOR CUSTOMIZATION.
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         PRICE
+    ================================================= -->
+
+    <div class="bottom-bar">
+
+        <div class="price-label">
+            ESTIMATED PRICE
+        </div>
+
+
+        <div
+            class="price"
+            id="price"
+        >
+            ₹2,50,00,000
+        </div>
+
+
+        <button
+            class="order-button"
+            id="orderButton"
+        >
+            SAVE & PLACE ORDER →
+        </button>
+
+    </div>
+
+</aside>
+
+
+
+<!-- =======================================================
+     THREE.JS
+======================================================== -->
+
+<script type="importmap">
+
+{
+    "imports": {
+
+        "three":
+        "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
+
+        "three/addons/":
+        "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+
+    }
+}
+
+</script>
+
+
+
+<script type="module">
+
+import * as THREE from "three";
+
+import {
+    OrbitControls
+}
+from
+"three/addons/controls/OrbitControls.js";
+
+import {
+    GLTFLoader
+}
+from
+"three/addons/loaders/GLTFLoader.js";
+
+
+/* =========================================================
+   GLOBALS
+========================================================= */
+
+window.THREE = THREE;
+
+window.carModel = null;
+
+let scene;
+let camera;
+let renderer;
+let controls;
+
+
+/* =========================================================
+   SCENE
+========================================================= */
+
+scene =
+    new THREE.Scene();
+
+scene.background = null;
+
+
+/* =========================================================
+   CAMERA
+========================================================= */
+
+camera =
+    new THREE.PerspectiveCamera(
+
+        42,
+
+        window.innerWidth /
+        (window.innerHeight - 68),
+
+        0.1,
+
+        100
+
+    );
+
+camera.position.set(
+    5.6,
+    2.8,
+    7.8
+);
+
+
+/* =========================================================
+   RENDERER
+========================================================= */
+
+renderer =
+    new THREE.WebGLRenderer({
+
+        antialias: true,
+
+        alpha: true
+
+    });
+
+
+/*
+   Put the studio environment
+   directly behind the transparent
+   Three.js canvas.
+*/
+
+renderer.domElement.style.background = `
+    radial-gradient(
+        ellipse at 50% 58%,
+        rgba(115,128,140,0.55) 0%,
+        rgba(65,76,86,0.40) 28%,
+        rgba(25,30,35,0.85) 58%,
+        rgba(8,11,14,1) 100%
+    ),
+    linear-gradient(
+        180deg,
+        #080b0e 0%,
+        #11161a 45%,
+        #242c32 72%,
+        #3c464d 100%
+    )
+`;
+
+
+renderer.setPixelRatio(
+
+    Math.min(
+        window.devicePixelRatio,
+        2
+    )
+
+);
+
+
+renderer.setSize(
+
+    window.innerWidth,
+
+    window.innerHeight - 68
+
+);
+
+
+renderer.outputColorSpace =
+    THREE.SRGBColorSpace;
+
+
+renderer.toneMapping =
+    THREE.ACESFilmicToneMapping;
+
+
+renderer.toneMappingExposure =
+    1.35;
+
+
+renderer.shadowMap.enabled =
+    true;
+
+
+renderer.shadowMap.type =
+    THREE.PCFSoftShadowMap;
+
+
+document
+    .getElementById(
+        "canvas-container"
+    )
+    .appendChild(
+        renderer.domElement
+    );
+
+
+/* =========================================================
+   LIGHTING
+========================================================= */
+
+const keyLight =
+    new THREE.DirectionalLight(
+        0xffffff,
+        4.2
+    );
+
+keyLight.position.set(
+    4,
+    8,
+    5
+);
+
+keyLight.castShadow =
+    true;
+
+keyLight.shadow.mapSize.width =
+    2048;
+
+keyLight.shadow.mapSize.height =
+    2048;
+
+scene.add(
+    keyLight
+);
+
+
+const frontLight =
+    new THREE.DirectionalLight(
+        0xdce8f5,
+        2.8
+    );
+
+frontLight.position.set(
+    -4,
+    4,
+    8
+);
+
+scene.add(
+    frontLight
+);
+
+
+const sideLight =
+    new THREE.DirectionalLight(
+        0x8ca8c7,
+        2.0
+    );
+
+sideLight.position.set(
+    -7,
+    3,
+    1
+);
+
+scene.add(
+    sideLight
+);
+
+
+const rimLight =
+    new THREE.DirectionalLight(
+        0xffffff,
+        2.8
+    );
+
+rimLight.position.set(
+    2,
+    5,
+    -8
+);
+
+scene.add(
+    rimLight
+);
+
+
+const hemiLight =
+    new THREE.HemisphereLight(
+        0xd4dce4,
+        0x161a1e,
+        1.7
+    );
+
+scene.add(
+    hemiLight
+);
+
+
+/* =========================================================
+   STUDIO FLOOR
+========================================================= */
+
+const floorGeometry =
+    new THREE.PlaneGeometry(
+        30,
+        30
+    );
+
+
+const floorMaterial =
+    new THREE.MeshStandardMaterial({
+
+        color: 0x3b444b,
+
+        metalness: 0.08,
+
+        roughness: 0.42
+
+    });
+
+
+const floor =
+    new THREE.Mesh(
+
+        floorGeometry,
+
+        floorMaterial
+
+    );
+
+
+floor.rotation.x =
+    -Math.PI / 2;
+
+
+/*
+   Floor is exactly at Y = 0.
+*/
+
+floor.position.y =
+    0;
+
+
+floor.receiveShadow =
+    true;
+
+
+scene.add(
+    floor
+);
+
+
+/* =========================================================
+   SOFT FLOOR GLOW
+========================================================= */
+
+const glowGeometry =
+    new THREE.CircleGeometry(
+        5.5,
+        64
+    );
+
+
+const glowMaterial =
+    new THREE.MeshBasicMaterial({
+
+        color: 0x7f8c96,
+
+        transparent: true,
+
+        opacity: 0.055,
+
+        depthWrite: false
+
+    });
+
+
+const glow =
+    new THREE.Mesh(
+
+        glowGeometry,
+
+        glowMaterial
+
+    );
+
+
+glow.rotation.x =
+    -Math.PI / 2;
+
+
+glow.position.y =
+    0.006;
+
+
+scene.add(
+    glow
+);
+
+
+/* =========================================================
+   ORBIT CONTROLS
+========================================================= */
+
+controls =
+    new OrbitControls(
+
+        camera,
+
+        renderer.domElement
+
+    );
+
+
+controls.enableDamping =
+    true;
+
+controls.dampingFactor =
+    0.06;
+
+controls.enablePan =
+    false;
+
+controls.minDistance =
+    3;
+
+controls.maxDistance =
+    12;
+
+
+controls.target.set(
+    0,
+    0.85,
+    0
+);
+
+
+/* =========================================================
+   LOAD GLB
+========================================================= */
+
+const loader =
+    new GLTFLoader();
+
+
+loader.load(
+
+    "models/urus-se/urus-se.glb",
+
+
+    function(gltf) {
+
+        const car =
+            gltf.scene;
+
+
+        window.carModel =
+            car;
+
+
+        scene.add(
+            car
+        );
+
+
+        /* =============================================
+           ORIGINAL MODEL BOUNDS
+        ============================================= */
+
+        const originalBox =
+            new THREE.Box3()
+                .setFromObject(car);
+
+
+        const originalCenter =
+            originalBox.getCenter(
+                new THREE.Vector3()
+            );
+
+
+        const originalSize =
+            originalBox.getSize(
+                new THREE.Vector3()
+            );
+
+
+        /* =============================================
+           CENTER X/Z
+        ============================================= */
+
+        car.position.x -=
+            originalCenter.x;
+
+
+        car.position.z -=
+            originalCenter.z;
+
+
+        /* =============================================
+           SCALE
+        ============================================= */
+
+        const maxDimension =
+            Math.max(
+
+                originalSize.x,
+
+                originalSize.y,
+
+                originalSize.z
+
+            );
+
+
+        const scale =
+            5.8 /
+            maxDimension;
+
+
+        car.scale.setScalar(
+            scale
+        );
+
+
+        /* =============================================
+           PLACE CAR ON FLOOR
+        ============================================= */
+
+        const scaledBox =
+            new THREE.Box3()
+                .setFromObject(car);
+
+
+        car.position.y -=
+            scaledBox.min.y;
+
+
+        /* =============================================
+           SHADOWS
+        ============================================= */
+
+        car.traverse(
+
+            function(object) {
+
+                if (
+                    object.isMesh
+                ) {
+
+                    object.castShadow =
+                        true;
+
+                    object.receiveShadow =
+                        true;
+
+                }
+
+            }
+
+        );
+
+
+        /* =============================================
+           LOADER OFF
+        ============================================= */
+
+        document
+            .getElementById(
+                "loader"
+            )
+            .classList
+            .add(
+                "hidden"
+            );
+
+
+        console.log(
+            "URUS GLB LOADED SUCCESSFULLY"
+        );
+
+    },
+
+
+    function(xhr) {
+
+        if (
+            xhr.total
+        ) {
+
+            const percent =
+                (
+                    xhr.loaded /
+                    xhr.total
+                ) * 100;
+
+
+            console.log(
+                "Loading:",
+                percent.toFixed(0) + "%"
+            );
+
+        }
+
+    },
+
+
+    function(error) {
+
+        console.error(
+            "GLB LOAD ERROR:",
+            error
+        );
+
+
+        document
+            .querySelector(
+                ".loader-text"
+            )
+            .textContent =
+            "UNABLE TO LOAD VEHICLE";
+
+    }
+
+);
+
+
+/* =========================================================
+   BODY PARTS
+========================================================= */
+
+const bodyParts = [
+
+    "yellow_Material_0",
+
+    "yellow_CRB_0",
+
+    "yellow001_CRB_0",
+
+    "yellow002_CRB_0",
+
+    "yellow003_CRB_0",
+
+    "yellow004_CRB_0",
+
+    "yellow005_Material_0"
+
+];
+
+
+/* =========================================================
+   PAINT
+========================================================= */
+
+window.applyCarPaint =
+function(hexColor) {
+
+    if (
+        !window.carModel
+    ) {
+
+        console.log(
+            "Car model not loaded yet."
+        );
+
+        return;
+
+    }
+
+
+    window.carModel.traverse(
+
+        function(object) {
+
+            if (
+                !object.isMesh
+            ) {
+                return;
+            }
+
+
+            if (
+                !bodyParts.includes(
+                    object.name
+                )
+            ) {
+                return;
+            }
+
+
+            const materials =
+
+                Array.isArray(
+                    object.material
+                )
+
+                ?
+
+                object.material
+
+                :
+
+                [object.material];
+
+
+            const newMaterials =
+
+                materials.map(
+
+                    function(material) {
+
+                        if (
+                            !material
+                        ) {
+                            return material;
+                        }
+
+
+                        const newMaterial =
+                            material.clone();
+
+
+                        newMaterial.map =
+                            null;
+
+
+                        if (
+                            newMaterial.color
+                        ) {
+
+                            newMaterial.color.set(
+                                hexColor
+                            );
+
+                        }
+
+
+                        newMaterial.metalness =
+                            0.82;
+
+
+                        newMaterial.roughness =
+                            0.20;
+
+
+                        newMaterial.clearcoat =
+                            0.55;
+
+
+                        newMaterial.clearcoatRoughness =
+                            0.18;
+
+
+                        newMaterial.needsUpdate =
+                            true;
+
+
+                        return newMaterial;
+
+                    }
+
+                );
+
+
+            object.material =
+
+                Array.isArray(
+                    object.material
+                )
+
+                ?
+
+                newMaterials
+
+                :
+
+                newMaterials[0];
+
+        }
+
+    );
+
+
+    console.log(
+        "CAR PAINT APPLIED:",
+        hexColor
+    );
+
+};
+
+
+/* =========================================================
+   PAINT BUTTONS
+========================================================= */
+
+document
+    .querySelectorAll(
+        ".paint-option"
+    )
+    .forEach(
+
+        function(button) {
+
+            button.addEventListener(
+
+                "click",
+
+                function(event) {
+
+                    event.stopPropagation();
+
+
+                    document
+                        .querySelectorAll(
+                            ".paint-option"
+                        )
+                        .forEach(
+
+                            function(item) {
+
+                                item.classList
+                                    .remove(
+                                        "active"
+                                    );
+
+                            }
+
+                        );
+
+
+                    button.classList
+                        .add(
+                            "active"
+                        );
+
+
+                    document
+                        .getElementById(
+                            "paint-name"
+                        )
+                        .textContent =
+                        button.dataset.name;
+
+
+                    window.applyCarPaint(
+                        button.dataset.color
+                    );
+
+                }
+
+            );
+
+        }
+
+    );
+
+
+/* =========================================================
+   PRICE
+========================================================= */
+
+const basePrice =
+    25000000;
+
+let finishPrice =
+    0;
+
+let wheelPrice =
+    0;
+
+let brakePrice =
+    0;
+
+let detailPrice =
+    0;
+
+
+function updatePrice() {
+
+    const total =
+
+        basePrice +
+
+        finishPrice +
+
+        wheelPrice +
+
+        brakePrice +
+
+        detailPrice;
+
+
+    document
+        .getElementById(
+            "price"
+        )
+        .textContent =
+
+        "₹" +
+        total.toLocaleString(
+            "en-IN"
+        );
+
+
+    return total;
+}
+
+
+/* =========================================================
+   FINISH
+========================================================= */
+
+document
+    .querySelectorAll(
+        ".finish-option"
+    )
+    .forEach(
+
+        function(button) {
+
+            button.addEventListener(
+
+                "click",
+
+                function(event) {
+
+                    event.stopPropagation();
+
+
+                    document
+                        .querySelectorAll(
+                            ".finish-option"
+                        )
+                        .forEach(
+
+                            function(item) {
+
+                                item.classList
+                                    .remove(
+                                        "active"
+                                    );
+
+                            }
+
+                        );
+
+
+                    button.classList
+                        .add(
+                            "active"
+                        );
+
+
+                    finishPrice =
+                        Number(
+                            button.dataset.price
+                        );
+
+
+                    applyFinish();
+
+
+                    updatePrice();
+
+                }
+
+            );
+
+        }
+
+    );
+
+
+function applyFinish() {
+
+    if (
+        !window.carModel
+    ) {
+        return;
+    }
+
+
+    const active =
+        document.querySelector(
+            ".finish-option.active"
+        );
+
+
+    if (
+        !active
+    ) {
+        return;
+    }
+
+
+    const finish =
+        active.dataset.finish;
+
+
+    let roughness =
+        0.20;
+
+
+    let clearcoat =
+        0.55;
+
+
+    if (
+        finish === "Matte"
+    ) {
+
+        roughness =
+            0.68;
+
+        clearcoat =
+            0.05;
+
+    }
+
+
+    if (
+        finish === "Satin"
+    ) {
+
+        roughness =
+            0.40;
+
+        clearcoat =
+            0.25;
+
+    }
+
+
+    window.carModel.traverse(
+
+        function(object) {
+
+            if (
+                !object.isMesh
+            ) {
+                return;
+            }
+
+
+            if (
+                !bodyParts.includes(
+                    object.name
+                )
+            ) {
+                return;
+            }
+
+
+            const materials =
+
+                Array.isArray(
+                    object.material
+                )
+
+                ?
+
+                object.material
+
+                :
+
+                [object.material];
+
+
+            materials.forEach(
+
+                function(material) {
+
+                    if (
+                        material
+                    ) {
+
+                        material.roughness =
+                            roughness;
+
+                        material.clearcoat =
+                            clearcoat;
+
+                        material.needsUpdate =
+                            true;
+
+                    }
+
+                }
+
+            );
+
+        }
+
+    );
+
+}
+
+
+/* =========================================================
+   WHEELS
+========================================================= */
+
+document
+    .querySelectorAll(
+        ".wheel-option[data-wheel]"
+    )
+    .forEach(
+
+        function(button) {
+
+            button.addEventListener(
+
+                "click",
+
+                function(event) {
+
+                    event.stopPropagation();
+
+
+                    document
+                        .querySelectorAll(
+                            ".wheel-option[data-wheel]"
+                        )
+                        .forEach(
+
+                            function(item) {
+
+                                item.classList
+                                    .remove(
+                                        "active"
+                                    );
+
+                            }
+
+                        );
+
+
+                    button.classList
+                        .add(
+                            "active"
+                        );
+
+
+                    wheelPrice =
+                        Number(
+                            button.dataset.price
+                        );
+
+
+                    updatePrice();
+
+                }
+
+            );
+
+        }
+
+    );
+
+
+/* =========================================================
+   BRAKES
+========================================================= */
+
+document
+    .querySelectorAll(
+        ".brake-option"
+    )
+    .forEach(
+
+        function(button) {
+
+            button.addEventListener(
+
+                "click",
+
+                function(event) {
+
+                    event.stopPropagation();
+
+
+                    document
+                        .querySelectorAll(
+                            ".brake-option"
+                        )
+                        .forEach(
+
+                            function(item) {
+
+                                item.classList
+                                    .remove(
+                                        "active"
+                                    );
+
+                            }
+
+                        );
+
+
+                    button.classList
+                        .add(
+                            "active"
+                        );
+
+
+                    brakePrice =
+                        Number(
+                            button.dataset.price
+                        );
+
+
+                    applyBrakeColor(
+                        button.dataset.brake
+                    );
+
+
+                    updatePrice();
+
+                }
+
+            );
+
+        }
+
+    );
+
+
+function applyBrakeColor(
+    colorName
+) {
+
+    if (
+        !window.carModel
+    ) {
+        return;
+    }
+
+
+    let color =
+        "#c91520";
+
+
+    if (
+        colorName === "Black"
+    ) {
+
+        color =
+            "#050505";
+
+    }
+
+
+    if (
+        colorName === "Yellow"
+    ) {
+
+        color =
+            "#e6d500";
+
+    }
+
+
+    window.carModel.traverse(
+
+        function(object) {
+
+            if (
+                !object.isMesh
+            ) {
+                return;
+            }
+
+
+            const materials =
+
+                Array.isArray(
+                    object.material
+                )
+
+                ?
+
+                object.material
+
+                :
+
+                [object.material];
+
+
+            materials.forEach(
+
+                function(material) {
+
+                    if (
+                        !material
+                    ) {
+                        return;
+                    }
+
+
+                    if (
+                        material.name ===
+                        "BreaksRedPaint"
+                    ) {
+
+                        material.map =
+                            null;
+
+                        material.color.set(
+                            color
+                        );
+
+                        material.metalness =
+                            0.45;
+
+                        material.roughness =
+                            0.30;
+
+                        material.needsUpdate =
+                            true;
+
+                    }
+
+                }
+
+            );
+
+        }
+
+    );
+
+}
+
+
+/* =========================================================
+   EXTERIOR DETAILS
+========================================================= */
+
+document
+    .querySelectorAll(
+        "[data-detail]"
+    )
+    .forEach(
+
+        function(button) {
+
+            button.addEventListener(
+
+                "click",
+
+                function(event) {
+
+                    event.stopPropagation();
+
+
+                    button.classList.toggle(
+                        "active"
+                    );
+
+
+                    const amount =
+                        Number(
+                            button.dataset.price
+                        );
+
+
+                    if (
+                        button.classList.contains(
+                            "active"
+                        )
+                    ) {
+
+                        detailPrice +=
+                            amount;
+
+                    } else {
+
+                        detailPrice -=
+                            amount;
+
+                    }
+
+
+                    updatePrice();
+
+                }
+
+            );
+
+        }
+
+    );
+
+
+/* =========================================================
+   TABS
+========================================================= */
+
+document
+    .querySelectorAll(
+        ".tab"
+    )
+    .forEach(
+
+        function(tab) {
+
+            tab.addEventListener(
+
+                "click",
+
+                function(event) {
+
+                    event.stopPropagation();
+
+
+                    document
+                        .querySelectorAll(
+                            ".tab"
+                        )
+                        .forEach(
+
+                            function(item) {
+
+                                item.classList
+                                    .remove(
+                                        "active"
+                                    );
+
+                            }
+
+                        );
+
+
+                    tab.classList
+                        .add(
+                            "active"
+                        );
+
+
+                    const selected =
+                        tab.dataset.tab;
+
+
+                    document
+                        .getElementById(
+                            "exterior-panel"
+                        )
+                        .style.display =
+
+                        selected ===
+                        "exterior"
+
+                        ? "block"
+
+                        : "none";
+
+
+                    document
+                        .getElementById(
+                            "interior-panel"
+                        )
+                        .style.display =
+
+                        selected ===
+                        "interior"
+
+                        ? "block"
+
+                        : "none";
+
+
+                    document
+                        .getElementById(
+                            "equipment-panel"
+                        )
+                        .style.display =
+
+                        selected ===
+                        "equipment"
+
+                        ? "block"
+
+                        : "none";
+
+                }
+
+            );
+
+        }
+
+    );
+
+
+/* =========================================================
+   COLLECTION
+========================================================= */
+
+document
+    .getElementById(
+        "collectionButton"
+    )
+    .addEventListener(
+
+        "click",
+
+        function() {
+
+            window.location.href =
+                "index.html";
+
+        }
+
+    );
+
+
+/* =========================================================
+   SAVE & ORDER
+========================================================= */
+
+document
+    .getElementById(
+        "orderButton"
+    )
+    .addEventListener(
+
+        "click",
+
+        function() {
+
+            const paint =
+                document
+                    .querySelector(
+                        ".paint-option.active"
+                    )
+                    ?.dataset.name
+                ||
+                "NERO";
+
+
+            const finish =
+                document
+                    .querySelector(
+                        ".finish-option.active"
+                    )
+                    ?.dataset.finish
+                ||
+                "Gloss";
+
+
+            const wheels =
+                document
+                    .querySelector(
+                        ".wheel-option[data-wheel].active"
+                    )
+                    ?.dataset.wheel
+                ||
+                "Standard";
+
+
+            const brakes =
+                document
+                    .querySelector(
+                        ".brake-option.active"
+                    )
+                    ?.dataset.brake
+                ||
+                "Red";
+
+
+            const total =
+                updatePrice();
+
+
+            const order = {
+
+                car:
+                    "Lamborghini Urus SE",
+
+                paint:
+                    paint,
+
+                finish:
+                    finish,
+
+                wheels:
+                    wheels,
+
+                brakeCalipers:
+                    brakes,
+
+                estimatedPrice:
+                    total,
+
+                status:
+                    "CUSTOMIZATION IN PROGRESS",
+
+                readyIn:
+                    "Approximately 5 days",
+
+                createdAt:
+                    new Date().toISOString()
+
+            };
+
+
+            localStorage.setItem(
+                "carstudioOrder",
+                JSON.stringify(order)
+            );
+
+
+            localStorage.setItem(
+                "carstudioOrderPrice",
+                total
+            );
+
+
+            alert(
+                "Configuration saved successfully."
+            );
+
+        }
+
+    );
+
+
+/* =========================================================
+   RESIZE
+========================================================= */
+
+window.addEventListener(
+
+    "resize",
+
+    function() {
+
+        camera.aspect =
+
+            window.innerWidth /
+            (window.innerHeight - 68);
+
+
+        camera.updateProjectionMatrix();
+
+
+        renderer.setSize(
+
+            window.innerWidth,
+
+            window.innerHeight - 68
+
+        );
+
+    }
+
+);
+
+
+/* =========================================================
+   ANIMATION
+========================================================= */
+
+function animate() {
+
+    requestAnimationFrame(
+        animate
+    );
+
+
+    controls.update();
+
+
+    renderer.render(
+        scene,
+        camera
+    );
+
+}
+
+
+animate();
+
+</script>
+
+</body>
+
+</html>

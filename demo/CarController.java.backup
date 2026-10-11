@@ -1,0 +1,111 @@
+package com.example.demo;
+
+import jakarta.servlet.http.HttpSession;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.math.BigDecimal;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/orders")
+public class CarOrderController {
+
+    private final CarOrderRepository orderRepository;
+    private final CustomerRepository customerRepository;
+
+    public CarOrderController(
+            CarOrderRepository orderRepository,
+            CustomerRepository customerRepository) {
+        this.orderRepository = orderRepository;
+        this.customerRepository = customerRepository;
+    }
+
+    public record OrderRequest(
+            String carName,
+            String customization,
+            BigDecimal price) {
+    }
+
+    @PostMapping
+    public Map<String, Object> placeOrder(
+            @RequestBody OrderRequest request,
+            HttpSession session) {
+
+        Long customerId = getCustomerId(session);
+
+        if (request == null
+                || request.carName() == null
+                || request.carName().isBlank()
+                || request.price() == null
+                || request.price().compareTo(BigDecimal.ZERO) <= 0
+                || request.price().compareTo(
+                        new BigDecimal("1000000000")) > 0) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Valid car name and price are required.");
+        }
+
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED,
+                        "Customer account not found."));
+
+        CarOrder order = new CarOrder();
+        order.setCustomer(customer);
+        order.setCarName(request.carName().trim());
+        order.setCustomization(
+                request.customization() == null
+                        ? ""
+                        : request.customization().trim());
+        order.setPrice(request.price());
+        order.setStatus("PLACED");
+
+        CarOrder saved = orderRepository.save(order);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("id", saved.getId());
+        result.put("carName", saved.getCarName());
+        result.put("customization", saved.getCustomization());
+        result.put("price", saved.getPrice());
+        result.put("status", saved.getStatus());
+        result.put("message", "Order placed successfully.");
+
+        return result;
+    }
+
+    @GetMapping("/my")
+    public List<Map<String, Object>> myOrders(HttpSession session) {
+        Long customerId = getCustomerId(session);
+
+        return orderRepository
+                .findByCustomerIdOrderByOrderDateDesc(customerId)
+                .stream()
+                .map(order -> {
+                    Map<String, Object> result = new LinkedHashMap<>();
+                    result.put("id", order.getId());
+                    result.put("carName", order.getCarName());
+                    result.put("customization", order.getCustomization());
+                    result.put("price", order.getPrice());
+                    result.put("status", order.getStatus());
+                    result.put("orderDate", order.getOrderDate());
+                    return result;
+                })
+                .toList();
+    }
+
+    private Long getCustomerId(HttpSession session) {
+        Object value = session.getAttribute("customerId");
+
+        if (!(value instanceof Number)) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Please log in first.");
+        }
+
+        return ((Number) value).longValue();
+    }
+}
