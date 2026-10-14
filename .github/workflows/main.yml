@@ -1,4 +1,3 @@
-
 name: Deploy CARSTUDIO to GitHub Pages
 
 on:
@@ -27,16 +26,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build frontend
         run: npm run build
-
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
 
       - name: Upload build
         uses: actions/upload-pages-artifact@v3
@@ -44,11 +39,11 @@ jobs:
           path: ./dist
 
   deploy:
+    needs: build
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
     steps:
       - name: Deploy
         id: deployment
